@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Game Pack</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1e1e2f;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-top: 1rem;
+    }
+
+    .games {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem;
+    }
+
+    .game-box {
+      background: #2b2b40;
+      padding: 1rem;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    canvas, .game-area {
+      margin: 1rem auto;
+      background: #000;
+      display: block;
+    }
+
+    button {
+      background: #667eea;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Mini Game Pack</h1>
+  <div class="games">
+    <!-- Reaction Timer Game -->
+    <div class="game-box">
+      <h2>Reaction Timer</h2>
+      <div class="game-area" id="reactionGame" style="height: 100px; background: grey; cursor: pointer;">
+        Click to Start
+      </div>
+      <p id="reactionResult">Result: —</p>
+    </div>
+
+    <!-- Memory Game -->
+    <div class="game-box">
+      <h2>Memory Flip</h2>
+      <div id="memoryGame"></div>
+      <button onclick="initMemoryGame()">Restart</button>
+    </div>
+
+    <!-- Clicker Game -->
+    <div class="game-box">
+      <h2>Clicker Challenge</h2>
+      <button onclick="startClickerGame()">Start</button>
+      <p id="clicks">Clicks: 0</p>
+    </div>
+  </div>
+
+  <script>
+    // Reaction Timer Game
+    const reactionGame = document.getElementById("reactionGame");
+    let reactionStart;
+
+    reactionGame.addEventListener("click", () => {
+      if (reactionGame.classList.contains("waiting")) {
+        const reactionTime = Date.now() - reactionStart;
+        document.getElementById("reactionResult").textContent = `Result: ${reactionTime}ms`;
+        reactionGame.textContent = "Click to Start";
+        reactionGame.style.background = "grey";
+        reactionGame.classList.remove("waiting");
+      } else {
+        reactionGame.textContent = "Wait for green...";
+        reactionGame.style.background = "red";
+        setTimeout(() => {
+          reactionStart = Date.now();
+          reactionGame.textContent = "CLICK!";
+          reactionGame.style.background = "green";
+          reactionGame.classList.add("waiting");
+        }, Math.random() * 2000 + 1000);
+      }
+    });
+
+    // Memory Game
+    const memoryGame = document.getElementById("memoryGame");
+    let flipped = [];
+
+    function initMemoryGame() {
+      memoryGame.innerHTML = "";
+      const emojis = ['🍕','🍔','🍟','🌮','🌭','🍿'];
+      const tiles = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+      tiles.forEach((emoji, index) => {
+        const tile = document.createElement('div');
+        tile.textContent = "❓";
+        tile.style.display = 'inline-block';
+        tile.style.width = '40px';
+        tile.style.height = '40px';
+        tile.style.lineHeight = '40px';
+        tile.style.margin = '5px';
+        tile.style.fontSize = '1.5rem';
+        tile.style.background = '#444';
+        tile.style.borderRadius = '5px';
+        tile.style.cursor = 'pointer';
+        tile.dataset.emoji = emoji;
+        tile.dataset.index = index;
+        tile.addEventListener('click', flipTile);
+        memoryGame.appendChild(tile);
+      });
+    }
+
+    function flipTile() {
+      if (flipped.length >= 2 || this.textContent !== "❓") return;
+      this.textContent = this.dataset.emoji;
+      flipped.push(this);
+      if (flipped.length === 2) {
+        const [a, b] = flipped;
+        if (a.dataset.emoji !== b.dataset.emoji) {
+          setTimeout(() => {
+            a.textContent = b.textContent = "❓";
+            flipped = [];
+          }, 600);
+        } else {
+          flipped = [];
+        }
+      }
+    }
+
+    initMemoryGame();
+
+    // Clicker Challenge
+    let clicks = 0;
+    function startClickerGame() {
+      clicks = 0;
+      document.getElementById("clicks").textContent = `Clicks: 0`;
+      const interval = setInterval(() => {
+        clearInterval(interval);
+        alert(`You clicked ${clicks} times in 5 seconds!`);
+      }, 5000);
+      window.onclick = () => {
+        clicks++;
+        document.getElementById("clicks").textContent = `Clicks: ${clicks}`;
+      };
+    }
+  </script>
+</body>
+</html>
